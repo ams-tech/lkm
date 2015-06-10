@@ -6,5 +6,5 @@ all: $(MODULES)
 
 .PHONY: $(MODULES)
 $(MODULES):
-	$(MAKE) -C $(LINUX_SRC) M=$(PWD)/$@ modules
+	$(MAKE) -C $(LINUX_SRC) M=$(CURDIR)/$@ modules
 	cp -f $@/$@.ko build/.
