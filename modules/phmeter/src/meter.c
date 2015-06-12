@@ -21,21 +21,31 @@
 
 #include <linux/module.h>
 #include <linux/init.h>
-#include "phmeter.h"
+#include <linux/kernel.h>
+#include <linux/slab.h>
+#include <linux/types.h>
+#include "meter.h"
 
 int __init meter_init(void);
 void __exit meter_exit(void);
 
-int major_id = PHMETER_MAJOR_ID;
-int num_devs = PHMETER_NUM_DEVS;
+int major_id = METER_MAJOR_ID;
+int num_devs = METER_NUM_DEVS;
 
 module_param(major_id, int, 0);
 module_param(num_devs, int, 0);
 
-MODULE_AUTHOR("Adam Schafer");
+MODULE_AUTHOR("ams-tech");
 MODULE_LICENSE("GPL v2");
 
 module_init(meter_init);
 modul_exit(meter_exit);
 
+int __init meter_init(void)
+{
+	dev_t dev_id = MKDEV(major_id, 0);
 
+	/* Register the major ID */
+	if(major_id == 0)
+		result = register_chrdev_region(dev_id, num_devs, DEVICE_NAME
+}
