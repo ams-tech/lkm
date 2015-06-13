@@ -5,7 +5,7 @@ LINUX_SRC ?= undefined
 all: 
 	rm -f Kbuild_inc
 	NUMMETERS=0; for meter in $(METERS) ; do \
-		echo "include $$meter/Kbuild" >> Kbuild_inc ; \
+		echo "include \$$(src)/$$meter/Kbuild" >> Kbuild_inc ; \
 		NUMMETERS=`echo $$NUMMETERS + 1 | bc`; \
 	done ; \
 	$(MAKE) -C $(LINUX_SRC) M=$(CURDIR) NUM_METERS=$$NUMMETERS modules

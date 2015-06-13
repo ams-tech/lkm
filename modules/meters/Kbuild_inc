@@ -1,1 +1,1 @@
-include ph/Kbuild
+include $(src)/ph/Kbuild

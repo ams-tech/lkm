@@ -55,4 +55,6 @@ typedef struct meter_dev_X
 
 #define MODULE_NAME	"meters"
 
+meter_error_t generic_dev_init(meter_dev_t * dev);
+
 #endif
