@@ -2,6 +2,6 @@ EXTRA_CFLAGS := -I$(src)/common/inc -DMETER_DEV_INIT="$(MY_INITS)" -DMETER_DEV_E
 
 
 obj-m := meters.o
-meters-y := common/src/meter.o common/src/meter_fops.o 
+meters-y := common/src/meter.o common/src/meter_fops.o common/src/meter_phy.o 
 
 include $(src)/Kbuild_inc
