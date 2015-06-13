@@ -1,2 +1,6 @@
+EXTRA_CFLAGS := -I$(src)/common/inc -DMETER_NUM_DEVS=$(NUM_METERS)
+
 obj-m := meters.o
-meters-y := 
+meters-y := common/src/meter.o 
+
+include Kbuild_inc

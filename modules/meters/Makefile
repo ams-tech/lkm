@@ -8,5 +8,5 @@ all:
 		echo "include $$meter/Kbuild" >> Kbuild_inc ; \
 		NUMMETERS=`echo $$NUMMETERS + 1 | bc`; \
 	done ; \
-	$(MAKE) -C $(LINUX_SRC) M=$(PWD) NUM_METERS=$$NUMMETERS modules
+	$(MAKE) -C $(LINUX_SRC) M=$(CURDIR) NUM_METERS=$$NUMMETERS modules
  
