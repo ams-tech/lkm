@@ -1,6 +1,6 @@
 /***********************************
 
-    PHMeter - a driver for a simple PHMeter.
+    meter - a driver for a simple meter device
     Copyright (C) <2015>  <ams-tech>
 
     This program is free software; you can redistribute it and/or modify
@@ -33,7 +33,6 @@ int major_id = METER_MAJOR_ID;
 int num_devs = METER_NUM_DEVS;
 
 module_param(major_id, int, 0);
-module_param(num_devs, int, 0);
 
 MODULE_AUTHOR("ams-tech");
 MODULE_LICENSE("GPL v2");
@@ -41,11 +40,32 @@ MODULE_LICENSE("GPL v2");
 module_init(meter_init);
 modul_exit(meter_exit);
 
+meter_dev_t devices_in_ram[METER_NUM_DEVS] = METER_DEV_INIT;
+
 int __init meter_init(void)
 {
+	int result;
 	dev_t dev_id = MKDEV(major_id, 0);
 
 	/* Register the major ID */
-	if(major_id == 0)
-		result = register_chrdev_region(dev_id, num_devs, DEVICE_NAME
+	if(major_id != 0)
+		result = register_chrdev_region(dev_id, num_devs, MODULE_NAME);
+	else
+	{
+		result = alloc_chrdev_region(&dev, 0, num_devs, MODULE_NAME);
+		major_id = MAJOR(dev);
+	}
+	if (result < 0)
+		return result;
+	
+	
+
 }
+
+
+
+
+
+
+
+
