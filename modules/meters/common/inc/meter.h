@@ -53,6 +53,12 @@ typedef struct meter_dev_X
 	#error "ERROR: METER_DEV_INIT must be defined at compile time!"
 #endif
 
+#ifndef METER_DEV_EXTERNS
+	#error "Error: METER_DEV_EXTERNS must be defined at compile time!"
+#else
+METER_DEV_EXTERNS
+#endif
+
 #define MODULE_NAME	"meters"
 
 meter_error_t generic_dev_init(meter_dev_t * dev);
