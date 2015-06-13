@@ -8,7 +8,7 @@ all:
 		echo "include \$$(src)/$$meter/Kbuild" >> Kbuild_inc ; \
 		NUMMETERS=`echo $$NUMMETERS + 1 | bc`; \
 		EXTERNS="$$EXTERNS extern meter_dev_t $${meter}_meter_dev;" ; \
-		INITS="$$INITS $${meter}_meter_dev," ; \
+		INITS="$$INITS &$${meter}_meter_dev," ; \
 	done ; INITS="$$INITS }" ; \
 	echo "$$EXTERNS" ; \
 	echo "$$INITS" ; \

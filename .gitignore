@@ -2,3 +2,4 @@ build
 linux
 Module.*
 modules.*
+*.swp

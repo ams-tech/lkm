@@ -20,17 +20,19 @@
 ***********************************/
 
 #include <linux/module.h>
+#include <linux/moduleparam.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/types.h>
+#include <linux/kdev_t.h>
+#include <linux/fs.h>
 #include "meter.h"
 
 int __init meter_init(void);
 void __exit meter_exit(void);
 
 int major_id = METER_MAJOR_ID;
-int num_devs = METER_NUM_DEVS;
 
 module_param(major_id, int, 0);
 
@@ -38,9 +40,9 @@ MODULE_AUTHOR("ams-tech");
 MODULE_LICENSE("GPL v2");
 
 module_init(meter_init);
-modul_exit(meter_exit);
+module_exit(meter_exit);
 
-meter_dev_t devices_in_ram[METER_NUM_DEVS] = METER_DEV_INIT;
+meter_dev_t * devices_in_ram[METER_NUM_DEVS] = METER_DEV_INIT;
 
 int __init meter_init(void)
 {
@@ -49,22 +51,27 @@ int __init meter_init(void)
 
 	/* Register the major ID */
 	if(major_id != 0)
-		result = register_chrdev_region(dev_id, num_devs, MODULE_NAME);
+		result = register_chrdev_region(dev_id, METER_NUM_DEVS, MODULE_NAME);
 	else
 	{
-		result = alloc_chrdev_region(&dev, 0, num_devs, MODULE_NAME);
-		major_id = MAJOR(dev);
+		result = alloc_chrdev_region(&dev_id, 0, METER_NUM_DEVS, MODULE_NAME);
+		major_id = MAJOR(dev_id);
 	}
 	if (result < 0)
 		return result;
-	
-	
 
+	return 0;
 }
 
+void __exit meter_exit(void)
+{
+	unregister_chrdev_region(MKDEV (major_id, 0), METER_NUM_DEVS);
+}
 
-
-
+meter_error_t generic_dev_init(meter_dev_t * dev)
+{
+	return METER_SUCCESS;
+}
 
 
 

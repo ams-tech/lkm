@@ -5,8 +5,9 @@ all:	linux modules
 
 .PHONY: modules
 modules:
+	mkdir -p build/modules
 	$(MAKE) LINUX_SRC=$(LINUX_SRC) -C modules
-	cp -f modules/build/* build/modules/*
+	cp modules/build/* build/modules/.
 
 .PHONY: clean_modules
 clean_modules:

@@ -1,0 +1,4 @@
+*.meters*
+*.mod.c
+*.cmd
+.tmp_versions
