@@ -25,10 +25,13 @@
 #define __METER_H__
 
 #include <linux/types.h>
+#include <linux/cdev.h>
+
 
 typedef enum meter_error_X
 {
 	METER_SUCCESS = 0,
+	METER_UNKNOWN_ERROR,
 }meter_error_t;
 
 /* Forward-reference structures go here */
@@ -65,5 +68,8 @@ METER_DEV_EXTERNS
 #define MODULE_NAME	"meters"
 
 meter_error_t generic_dev_init(meter_dev_t * dev);
+
+extern int major_id;
+extern meter_dev_t * devices_in_ram[];
 
 #endif
