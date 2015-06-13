@@ -27,6 +27,7 @@
 #include <linux/types.h>
 #include <linux/kdev_t.h>
 #include <linux/fs.h>
+#include "meter_fops.h"
 #include "meter.h"
 
 int __init meter_init(void);
@@ -46,7 +47,7 @@ meter_dev_t * devices_in_ram[METER_NUM_DEVS] = METER_DEV_INIT;
 
 int __init meter_init(void)
 {
-	int result;
+	int result, i;
 	dev_t dev_id = MKDEV(major_id, 0);
 
 	/* Register the major ID */
@@ -60,6 +61,11 @@ int __init meter_init(void)
 	if (result < 0)
 		return result;
 
+	for(i = 0; i < METER_NUM_DEVS; i++)
+	{
+		devices_in_ram[i]->init(devices_in_ram[i]);
+	}
+
 	return 0;
 }
 
@@ -70,6 +76,7 @@ void __exit meter_exit(void)
 
 meter_error_t generic_dev_init(meter_dev_t * dev)
 {
+	dev->fops->init(dev);
 	return METER_SUCCESS;
 }
 

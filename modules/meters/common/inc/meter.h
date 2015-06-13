@@ -39,7 +39,7 @@ typedef meter_error_t (*meter_init_f)(struct meter_dev_X * dev);
 typedef struct meter_dev_X
 {
 	struct meter_fops_X * fops;
-	meter_init_f init;
+	const meter_init_f init;
 }meter_dev_t;
 
 
