@@ -1,4 +1,4 @@
-MODULES = phmeter
+MODULES = meters
 
 
 .PHONY: all
@@ -6,5 +6,5 @@ all: $(MODULES)
 
 .PHONY: $(MODULES)
 $(MODULES):
-	$(MAKE) -C $(LINUX_SRC) M=$(CURDIR)/$@ modules
+	$(MAKE) -C $(CURDIR)/$@ LINUX_SRC=$(LINUX_SRC)
 	cp -f $@/$@.ko build/.
