@@ -1,4 +1,3 @@
-
 /***********************************
 
     meter - a driver for a simple meter device
@@ -20,50 +19,11 @@
 
 ***********************************/
 
+#include "meter_fops.h"
 
-#ifndef __METER_H__
-#define __METER_H__
-
-#include <linux/types.h>
-
-typedef enum meter_error_X
+meter_error_t generic_fops_init(meter_dev_t * dev)
 {
-	METER_SUCCESS = 0,
-}meter_error_t;
+	
+	return METER_SUCCESS;
+}
 
-/* Forward-reference structures go here */
-struct meter_fops_X;
-struct meter_dev_X;
-
-/*A generic init function pointer type*/
-typedef meter_error_t (*meter_init_f)(struct meter_dev_X * dev);
-
-typedef struct meter_dev_X
-{
-	struct meter_fops_X * fops;
-	meter_init_f const init;
-	dev_t dev_num;
-}meter_dev_t;
-
-
-#define METER_MAJOR_ID	0
-
-#ifndef METER_NUM_DEVS
-	#error "Error: METER_NUM_DEVS must be defined at compile time!"
-#endif
-
-#ifndef METER_DEV_INIT
-	#error "ERROR: METER_DEV_INIT must be defined at compile time!"
-#endif
-
-#ifndef METER_DEV_EXTERNS
-	#error "Error: METER_DEV_EXTERNS must be defined at compile time!"
-#else
-METER_DEV_EXTERNS
-#endif
-
-#define MODULE_NAME	"meters"
-
-meter_error_t generic_dev_init(meter_dev_t * dev);
-
-#endif

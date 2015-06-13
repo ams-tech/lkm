@@ -63,7 +63,9 @@ int __init meter_init(void)
 
 	for(i = 0; i < METER_NUM_DEVS; i++)
 	{
-		devices_in_ram[i]->init(devices_in_ram[i]);
+		meter_dev_t * temp = devices_in_ram[i];
+		temp->dev_num = MKDEV(major_id, i);
+		temp->init(temp);
 	}
 
 	return 0;
