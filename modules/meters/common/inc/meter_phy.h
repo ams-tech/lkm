@@ -38,4 +38,8 @@ typedef struct dev_phy_X
 	gpio_pin_list_t * pin_list;
 }dev_phy_t;
 
+meter_error_t checkout_dev_phy(dev_phy_t * dev_phy);
+void release_dev_phy(dev_phy_t * dev_phy);
+gpio_pin_t * create_gpio(dev_phy_t * dev_phy, u32 data_direction, u32 data, u32 open_drain, u8 bit);
+
 #endif

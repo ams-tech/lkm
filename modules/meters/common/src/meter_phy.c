@@ -26,8 +26,56 @@
 #include "meter_phy.h"
 #include <asm/io.h>
 
+static meter_error_t checkout_phy_reg(dev_phy_t * dev_phy, phy_reg_t * reg);
+static phy_reg_t * get_phy_reg(u32 address);
+static inline void register_set_bits(phy_reg_t * reg, u32 bitfield);
+static inline void register_unset_bits(phy_reg_t * reg, u32 bitfield);
+static inline void register_write(phy_reg_t * reg, u32 value);
+static inline u32 register_read(phy_reg_t * reg);
+
 static DEFINE_MUTEX(phy_lock);
 static phy_reg_list_t * reg_head = NULL;
+
+static inline void register_set_bits(phy_reg_t * reg, u32 bitfield)
+{
+        if(reg->remap != NULL)
+        {
+                u32 value = ioread32(reg->remap);
+                value |= bitfield;
+                iowrite32(value, reg->remap);
+        }
+}
+
+static inline void register_unset_bits(phy_reg_t * reg, u32 bitfield)
+{
+        if(reg->remap != NULL)
+        {
+                u32 value = ioread32(reg->remap);
+                value &= ~bitfield;
+                iowrite32(value, reg->remap);
+        }
+}
+
+static inline void register_write(phy_reg_t * reg, u32 value)
+{
+	if(reg->remap != NULL)
+	{
+		iowrite32(value, reg->remap);
+	}
+}
+
+static inline u32 register_read(phy_reg_t * reg)
+{
+	u32 retval = 0xFFFFFFFF;
+	if(reg->remap != NULL)
+	{
+		retval = ioread32(reg->remap);
+	}
+	
+	return retval;
+}
+
+
 
 static meter_error_t checkout_phy_reg(dev_phy_t * dev_phy, phy_reg_t * reg)
 {
@@ -58,6 +106,36 @@ static meter_error_t checkout_phy_reg(dev_phy_t * dev_phy, phy_reg_t * reg)
 	return METER_SUCCESS;
 }
 
+/* Takes data direction, data, and open_drain register addresses */
+gpio_pin_t * create_gpio(dev_phy_t * dev_phy, u32 dd, u32 data, u32 od, u8 bit)
+{
+	gpio_pin_list_t ** temp = &(dev_phy->pin_list);
+	gpio_pin_list_t * entry = kmalloc(sizeof(gpio_pin_list_t), GFP_KERNEL);
+	
+	if (entry == NULL)
+		return NULL;
+
+	entry->pin = kmalloc(sizeof(gpio_pin_t), GFP_KERNEL);
+	if(entry->pin == NULL)
+	{
+		kfree(entry);
+		return NULL;
+	}
+
+	entry->pin->bit = bit;
+	entry->pin->data_direction = get_phy_reg(dd);
+	entry->pin->data = get_phy_reg(data);
+	entry->pin->open_drain = get_phy_reg(od);
+
+	while(*temp != NULL)
+	{
+		temp = &((*temp)->next);
+	}
+	*temp = entry;
+
+	return entry->pin;
+}
+
 void release_dev_phy(dev_phy_t * dev_phy)
 {
 	phy_reg_list_t ** temp = &(dev_phy->owned_reg_list);
@@ -79,7 +157,6 @@ void release_dev_phy(dev_phy_t * dev_phy)
 		cur_reg->remap = NULL;
 		mutex_unlock(&(cur_reg->lock));
 	}
-
 
 	mutex_unlock(&(dev_phy->lock));
 	return;
@@ -119,7 +196,7 @@ exit:
 	return retval;
 }
 
-phy_reg_t * get_phy_reg(u32 address)
+static phy_reg_t * get_phy_reg(u32 address)
 {
 	phy_reg_t * retval = NULL;
 	phy_reg_list_t ** temp = &reg_head;
@@ -158,5 +235,7 @@ phy_reg_t * get_phy_reg(u32 address)
 
 exit:
 	mutex_unlock(&phy_lock);
+	if(retval == NULL)
+		printk(KERN_NOTICE "Unable to create register!");
 	return retval;
 }
