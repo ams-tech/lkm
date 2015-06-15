@@ -26,6 +26,14 @@
 #include "meter_phy.h"
 #include <asm/io.h>
 
+/****************************************
+
+This is all pretty Broadcom specific and not really 'common', but 
+I'm not planning on porting this to anything besides the rpi, so
+this can be our common phy driver.
+
+*****************************************/
+
 static meter_error_t checkout_phy_reg(dev_phy_t * dev_phy, phy_reg_t * reg);
 static phy_reg_t * get_phy_reg(u32 address);
 static inline void register_set_bits(phy_reg_t * reg, u32 bitfield);
@@ -75,8 +83,6 @@ static inline u32 register_read(phy_reg_t * reg)
 	return retval;
 }
 
-
-
 static meter_error_t checkout_phy_reg(dev_phy_t * dev_phy, phy_reg_t * reg)
 {
 	/*Note: Only call this fucnction when you own the phy and dev_phy locks*/
@@ -104,6 +110,21 @@ static meter_error_t checkout_phy_reg(dev_phy_t * dev_phy, phy_reg_t * reg)
 
 	reg->remap = ioremap_nocache((unsigned long)reg->address, sizeof(u32));
 	return METER_SUCCESS;
+}
+
+void set_open_drain(gpio_pin_t * pin)
+{
+	register_set_bits(pin->open_drain, 1 << pin->bit);
+}
+
+void set_totem_pole(gpio_pin_t * pin)
+{
+	register_clear_bits(pin->open_drain, 1 << pin->bit);
+}
+
+void set_input(gpio_pin_t * pin)
+{
+	register_set_bits
 }
 
 /* Takes data direction, data, and open_drain register addresses */

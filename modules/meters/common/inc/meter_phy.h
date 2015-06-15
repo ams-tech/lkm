@@ -42,4 +42,10 @@ meter_error_t checkout_dev_phy(dev_phy_t * dev_phy);
 void release_dev_phy(dev_phy_t * dev_phy);
 gpio_pin_t * create_gpio(dev_phy_t * dev_phy, u32 data_direction, u32 data, u32 open_drain, u8 bit);
 
+void set_open_drain(gpio_pin_t * pin);
+void set_totem_pole(gpio_pin_t * pin);
+void set_input(gpio_pin_t * pin);
+void set_output(gpio_pin_t * pin);
+void set_data(gpio_pin_t * pin);
+
 #endif
