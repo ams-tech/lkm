@@ -46,7 +46,7 @@ this can be our common phy driver.
 
 static DEFINE_MUTEX(gpio_lock);
 
-meter_error_t set_gpio_function(u8 gpio_num, gpio_function_t func)
+meter_error_t set_gpio_function(u32 gpio_num, gpio_function_t func)
 {
 	void * remap;
 	u32 temp;

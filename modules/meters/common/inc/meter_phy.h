@@ -4,6 +4,8 @@
 #include <linux/mutex.h>
 #include <linux/types.h>
 
+#include "meter.h"
+
 #define NUM_GPIO	41
 
 typedef enum gpio_function_X
@@ -21,6 +23,6 @@ typedef enum gpio_function_X
 meter_error_t clear_gpio_pin(u32 gpio_num);
 meter_error_t set_gpio_pin(u32 gpio_num);
 meter_error_t get_gpio_pin(u32 gpio_num, bool * value);
-
+meter_error_t set_gpio_function(u32 gpio_num, gpio_function_t func);
 
 #endif
