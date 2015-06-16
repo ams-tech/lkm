@@ -29,234 +29,107 @@
 /****************************************
 
 This is all pretty Broadcom specific and not really 'common', but 
-I'm not planning on porting this to anything besides the rpi, so
+I'm not planning on porting this to anything besides the rpi2, so
 this can be our common phy driver.
 
 *****************************************/
 
-static meter_error_t checkout_phy_reg(dev_phy_t * dev_phy, phy_reg_t * reg);
-static phy_reg_t * get_phy_reg(u32 address);
-static inline void register_set_bits(phy_reg_t * reg, u32 bitfield);
-static inline void register_unset_bits(phy_reg_t * reg, u32 bitfield);
-static inline void register_write(phy_reg_t * reg, u32 value);
-static inline u32 register_read(phy_reg_t * reg);
+#define PINS_PER_FSEL	10
 
-static DEFINE_MUTEX(phy_lock);
-static phy_reg_list_t * reg_head = NULL;
+#define FSEL_START_ADDR	0x7E200060
+#define GPSET_START_ADDR 0x7E20001C
+#define GPCLR_START_ADDR 0x7E200028
+#define GPLEV_START_ADDR 0x7E200034
 
-static inline void register_set_bits(phy_reg_t * reg, u32 bitfield)
+#define GPIO_FUNC_BITFIELD 7
+#define BITS_PER_REG 32
+
+static DEFINE_MUTEX(gpio_lock);
+
+meter_error_t set_gpio_function(u8 gpio_num, gpio_function_t func)
 {
-        if(reg->remap != NULL)
-        {
-                u32 value = ioread32(reg->remap);
-                value |= bitfield;
-                iowrite32(value, reg->remap);
-        }
-}
-
-static inline void register_unset_bits(phy_reg_t * reg, u32 bitfield)
-{
-        if(reg->remap != NULL)
-        {
-                u32 value = ioread32(reg->remap);
-                value &= ~bitfield;
-                iowrite32(value, reg->remap);
-        }
-}
-
-static inline void register_write(phy_reg_t * reg, u32 value)
-{
-	if(reg->remap != NULL)
-	{
-		iowrite32(value, reg->remap);
-	}
-}
-
-static inline u32 register_read(phy_reg_t * reg)
-{
-	u32 retval = 0xFFFFFFFF;
-	if(reg->remap != NULL)
-	{
-		retval = ioread32(reg->remap);
-	}
+	void * remap;
+	u32 temp;
+	u8 offset;
 	
-	return retval;
-}
+	if(gpio_num >= NUM_GPIO)
+		return METER_OUT_OF_RANGE;
 
-static meter_error_t checkout_phy_reg(dev_phy_t * dev_phy, phy_reg_t * reg)
-{
-	/*Note: Only call this fucnction when you own the phy and dev_phy locks*/
-	phy_reg_list_t ** temp = &(dev_phy->owned_reg_list);
+	remap = ioremap_nocache(FSEL_START_ADDR + (4 * (gpio_num / PINS_PER_FSEL)), sizeof(u32));
+	if(remap == NULL)
+		return METER_UNKNOWN_ERROR;
 
-	while(*temp != NULL)
-	{
-		if((*temp)->reg == reg)
-			return METER_SUCCESS;
-		temp = &((*temp)->next);
-	}
+	offset = 3 * (gpio_num % PINS_PER_FSEL);
+	mutex_lock(&gpio_lock);
 
-	/* We don't own this register yet.  Get the lock */
-	mutex_lock(&(reg->lock));
-	*temp = kmalloc(sizeof(phy_reg_list_t), GFP_KERNEL);
+	temp = ioread32(remap);
+	temp &= ~(GPIO_FUNC_BITFIELD << offset);
+	temp |= (((u32)func) << offset);
+	iowrite32(temp, remap);
 
-	if (*temp == NULL)
-	{
-		mutex_unlock(&(reg->lock));
-		return METER_ALLOC_ERROR;
-	}
+	mutex_unlock(&gpio_lock);
+	iounmap(remap);
 
-	(*temp)->next = NULL;
-	(*temp)->reg = reg;
-
-	reg->remap = ioremap_nocache((unsigned long)reg->address, sizeof(u32));
 	return METER_SUCCESS;
 }
 
-void set_open_drain(gpio_pin_t * pin)
+meter_error_t get_gpio_pin(u32 gpio_num, bool * value)
 {
-	register_set_bits(pin->open_drain, 1 << pin->bit);
+	void * remap;
+        u8 offset;
+
+        if(gpio_num >= NUM_GPIO)
+                return METER_OUT_OF_RANGE;
+
+        remap = ioremap_nocache(GPLEV_START_ADDR + (4 * (gpio_num / BITS_PER_REG)), sizeof(u32));
+        if (remap == NULL)
+                return METER_UNKNOWN_ERROR;
+
+	offset = gpio_num % BITS_PER_REG;
+
+	*value = (ioread32(remap) & (1 << offset)) != 0;
+	iounmap(remap);
+
+        return METER_SUCCESS;
+
 }
 
-void set_totem_pole(gpio_pin_t * pin)
+meter_error_t set_gpio_pin(u32 gpio_num)
 {
-	register_clear_bits(pin->open_drain, 1 << pin->bit);
+	void * remap;
+	u8 offset;
+
+	if(gpio_num >= NUM_GPIO)
+		return METER_OUT_OF_RANGE;
+
+	remap = ioremap_nocache(GPSET_START_ADDR + (4 * (gpio_num / BITS_PER_REG)), sizeof(u32));
+	if (remap == NULL)
+		return METER_UNKNOWN_ERROR;
+
+	offset = gpio_num % BITS_PER_REG;
+	iowrite32((1 << offset), remap);
+	iounmap(remap);
+
+	return METER_SUCCESS;
 }
 
-void set_input(gpio_pin_t * pin)
+meter_error_t clear_gpio_pin(u32 gpio_num)
 {
-	register_set_bits
+	void * remap;
+        u8 offset;
+
+        if(gpio_num >= NUM_GPIO)
+                return METER_OUT_OF_RANGE;
+
+        remap = ioremap_nocache(GPCLR_START_ADDR + (4 * (gpio_num / BITS_PER_REG)), sizeof(u32));
+        if (remap == NULL)
+                return METER_UNKNOWN_ERROR;
+
+        offset = gpio_num % BITS_PER_REG;
+        iowrite32((1 << offset), remap);
+        iounmap(remap);
+
+	return METER_SUCCESS;
 }
 
-/* Takes data direction, data, and open_drain register addresses */
-gpio_pin_t * create_gpio(dev_phy_t * dev_phy, u32 dd, u32 data, u32 od, u8 bit)
-{
-	gpio_pin_list_t ** temp = &(dev_phy->pin_list);
-	gpio_pin_list_t * entry = kmalloc(sizeof(gpio_pin_list_t), GFP_KERNEL);
-	
-	if (entry == NULL)
-		return NULL;
 
-	entry->pin = kmalloc(sizeof(gpio_pin_t), GFP_KERNEL);
-	if(entry->pin == NULL)
-	{
-		kfree(entry);
-		return NULL;
-	}
-
-	entry->pin->bit = bit;
-	entry->pin->data_direction = get_phy_reg(dd);
-	entry->pin->data = get_phy_reg(data);
-	entry->pin->open_drain = get_phy_reg(od);
-
-	while(*temp != NULL)
-	{
-		temp = &((*temp)->next);
-	}
-	*temp = entry;
-
-	return entry->pin;
-}
-
-void release_dev_phy(dev_phy_t * dev_phy)
-{
-	phy_reg_list_t ** temp = &(dev_phy->owned_reg_list);
-
-	if(!mutex_is_locked(&(dev_phy->lock)))
-		return;
-
-	while(*temp != NULL)
-	{
-		phy_reg_list_t ** cur = temp;
-		phy_reg_t * cur_reg = (*temp)->reg;
-		
-		temp = &((*temp)->next);
-
-		kfree(*cur);
-		*cur = NULL;
-
-		iounmap(cur_reg->remap);
-		cur_reg->remap = NULL;
-		mutex_unlock(&(cur_reg->lock));
-	}
-
-	mutex_unlock(&(dev_phy->lock));
-	return;
-}
-
-meter_error_t checkout_dev_phy(dev_phy_t * dev_phy)
-{
-	meter_error_t retval = METER_SUCCESS;
-	gpio_pin_list_t ** temp = &(dev_phy->pin_list);
-	
-	mutex_lock(&(dev_phy->lock));
-	
-	mutex_lock(&phy_lock);
-
-	while(*temp != NULL)
-	{
-		gpio_pin_t * cur = (*temp)->pin;
-
-		retval = checkout_phy_reg(dev_phy, cur->data_direction);
-		if(retval != METER_SUCCESS)
-			goto exit;
-
-		retval = checkout_phy_reg(dev_phy, cur->data);
-                if(retval != METER_SUCCESS)
-                        goto exit;
-
-		retval = checkout_phy_reg(dev_phy, cur->open_drain);
-                if(retval != METER_SUCCESS)
-                        goto exit;
-
-
-		temp = &((*temp)->next);
-	}
-
-exit:
-	mutex_unlock(&phy_lock);
-	return retval;
-}
-
-static phy_reg_t * get_phy_reg(u32 address)
-{
-	phy_reg_t * retval = NULL;
-	phy_reg_list_t ** temp = &reg_head;
-
-	mutex_lock(&phy_lock);
-
-	while(*temp != NULL)
-	{
-		if((*temp)->reg->address == address)
-		{
-			retval = (*temp)->reg;
-			goto exit;
-		}
-		temp = &((*temp)->next);
-	}	
-
-	*temp = kmalloc(sizeof(phy_reg_list_t), GFP_KERNEL);
-	if (*temp == NULL)
-		goto exit;
-	(*temp)->next = NULL;
-
-	/*Register not found -- create and initialize a new one*/
-	retval = kmalloc(sizeof(phy_reg_t), GFP_KERNEL);
-	if(retval != NULL)
-	{
-		retval->address = address;
-		mutex_init(&(retval->lock));
-		(*temp)->reg = retval;
-		retval->remap = NULL;
-	}
-	else
-	{
-		kfree(*temp);
-		*temp = NULL;
-	}
-
-exit:
-	mutex_unlock(&phy_lock);
-	if(retval == NULL)
-		printk(KERN_NOTICE "Unable to create register!");
-	return retval;
-}

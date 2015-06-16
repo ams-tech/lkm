@@ -34,6 +34,7 @@ typedef enum meter_error_X
 	METER_UNKNOWN_ERROR,
 	METER_LOCK_ERROR,
 	METER_ALLOC_ERROR,
+	METER_OUT_OF_RANGE,
 }meter_error_t;
 
 /* Forward-reference structures go here */
