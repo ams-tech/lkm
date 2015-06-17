@@ -42,7 +42,7 @@ const struct file_operations default_fops =
 };
 
 /* This function sets up our cdev.  Any replacement function should do the same */
-meter_error_t generic_fops_init(meter_dev_t * dev)
+meter_error_t fops_init(meter_dev_t * dev)
 {
 	int result;
 
@@ -56,6 +56,11 @@ meter_error_t generic_fops_init(meter_dev_t * dev)
 		return METER_UNKNOWN_ERROR;
 	}
 	return METER_SUCCESS;
+}
+
+void fops_exit(meter_dev_t * dev)
+{
+	cdev_del(&(dev->fops->cdev));
 }
 
 long default_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)

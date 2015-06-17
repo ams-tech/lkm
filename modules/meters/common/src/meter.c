@@ -73,7 +73,14 @@ int __init meter_init(void)
 
 void __exit meter_exit(void)
 {
+	int i;
+
 	unregister_chrdev_region(MKDEV (major_id, 0), METER_NUM_DEVS);
+	
+	for(i = 0; i < METER_NUM_DEVS; i++)
+	{
+		fops_exit(devices_in_ram[i]);
+	}
 }
 
 meter_error_t generic_dev_init(meter_dev_t * dev)

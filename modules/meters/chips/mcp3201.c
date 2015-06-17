@@ -60,7 +60,7 @@ u16 read_voltage(mcp3201_t * chip)
 	for(x = 0; x < RESULT_BITS; x++)
 	{
 		if(read_bit(chip))
-			retval |= RESULT_BITS - 1 - x;
+			retval |= 1 << (RESULT_BITS - 1 - x);
 	}
 
 exit:

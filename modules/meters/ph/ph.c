@@ -3,7 +3,7 @@
 
 static meter_fops_t my_fops =
 {
-	.init = &generic_fops_init
+	.init = &fops_init
 };
 
 meter_dev_t ph_meter_dev =

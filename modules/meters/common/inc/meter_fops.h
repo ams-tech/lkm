@@ -12,8 +12,8 @@ typedef struct meter_fops_X
 	meter_init_f init;
 }meter_fops_t;
 
-meter_error_t generic_fops_init(meter_dev_t * dev);
-
+meter_error_t fops_init(meter_dev_t * dev);
+void fops_exit(meter_dev_t * dev);
 
 
 #endif
