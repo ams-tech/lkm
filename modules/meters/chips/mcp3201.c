@@ -8,6 +8,7 @@
 #define TSCH_NS	625
 #define TSUCS_NS	100
 
+
 static inline bool read_bit(mcp3201_t * chip)
 {
 	bool retval;
@@ -21,7 +22,7 @@ static inline bool read_bit(mcp3201_t * chip)
 	return retval;
 }
 
-u16 read_voltage(mcp3201_t * chip)
+static u16 read_voltage(mcp3201_t * chip)
 {
 	u16 retval = 0;
 	int x;
@@ -66,4 +67,25 @@ u16 read_voltage(mcp3201_t * chip)
 exit:
 	mutex_unlock(&(chip->lock));
 	return retval;
+}
+
+meter_error_t mcp3201_startup(chip_data_t data)
+{
+	mutex_init(&(data.mcp3201->lock));
+	return METER_SUCCESS;
+}
+
+void mcp3201_exit(chip_data_t data)
+{
+	
+}
+
+meter_error_t mcp3201_read(chip_data_t data, meter_data_t * result)
+{
+	result->sig_bits = RESULT_BITS;
+	result->payload = read_voltage(data.mcp3201);
+	if(result->payload == MCP3201_ERROR)
+		return METER_UNKNOWN_ERROR;
+	else
+		return METER_SUCCESS;
 }

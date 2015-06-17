@@ -5,7 +5,6 @@
 #include <linux/types.h>
 
 #include "meter.h"
-#include "mcp3201.h"
 
 #define NUM_GPIO	41
 
@@ -27,17 +26,23 @@ typedef struct meter_data_X
 	u32 payload;
 }meter_data_t;
 
+struct mcp3201_X;
+
 typedef union chip_data_X
 {
-	mcp3201_t * mcp3201;
+	struct mcp3201_X * mcp3201;
 }chip_data_t;
 
-typedef meter_error_t (*get_meter_data_f)(chip_data_t * data, meter_data_t * result);
+typedef meter_error_t (*read_meter_f)(chip_data_t data, meter_data_t * result);
+typedef meter_error_t (*meter_startup_f)(chip_data_t data);
+typedef void (*meter_exit_f)(chip_data_t data);
 
 typedef struct meter_interface_X
 {
-	chip_data_t * data;
-	get_meter_data_f read;
+	chip_data_t data;
+	read_meter_f read;
+	meter_startup_f startup;
+	meter_exit_f exit;
 }meter_interface_t;
 
 

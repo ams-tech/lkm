@@ -40,6 +40,7 @@ typedef enum meter_error_X
 /* Forward-reference structures go here */
 struct meter_fops_X;
 struct meter_dev_X;
+struct meter_interface_X;
 
 /*A generic init function pointer type*/
 typedef meter_error_t (*meter_init_f)(struct meter_dev_X * dev);
@@ -47,8 +48,9 @@ typedef meter_error_t (*meter_init_f)(struct meter_dev_X * dev);
 typedef struct meter_dev_X
 {
 	struct meter_fops_X * fops;
-	meter_init_f const init;
+	struct meter_interfact_X * meter;
 	dev_t dev_num;
+	meter_init_f init;
 }meter_dev_t;
 
 
