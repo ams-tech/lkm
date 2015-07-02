@@ -29,6 +29,7 @@
 #include <linux/fs.h>
 #include "meter_fops.h"
 #include "meter.h"
+#include "meter_phy.h"
 
 int __init meter_init(void);
 void __exit meter_exit(void);
@@ -65,7 +66,9 @@ int __init meter_init(void)
 	{
 		meter_dev_t * temp = devices_in_ram[i];
 		temp->dev_num = MKDEV(major_id, i);
-		temp->init(temp);
+		if(temp->init(temp) != METER_SUCCESS)
+			return -ENODEV;
+		
 	}
 
 	return 0;
@@ -80,12 +83,22 @@ void __exit meter_exit(void)
 	for(i = 0; i < METER_NUM_DEVS; i++)
 	{
 		fops_exit(devices_in_ram[i]);
+		METER_INTERFACE_EXIT(devices_in_ram[i]->meter);
 	}
 }
 
 meter_error_t generic_dev_init(meter_dev_t * dev)
 {
-	dev->fops->init(dev);
+	meter_error_t retval;
+	
+	retval = dev->fops->init(dev);
+	if(retval != METER_SUCCESS)
+		return retval;
+	
+	retval = METER_INTERFACE_INIT(dev->meter);
+	if(retval != METER_SUCCESS)
+                return retval;
+	
 	return METER_SUCCESS;
 }
 

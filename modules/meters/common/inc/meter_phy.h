@@ -41,10 +41,13 @@ typedef struct meter_interface_X
 {
 	chip_data_t data;
 	read_meter_f read;
-	meter_startup_f startup;
+	meter_startup_f init;
 	meter_exit_f exit;
 }meter_interface_t;
 
+#define METER_INTERFACE_INIT(m)	m->init(m->data)
+#define METER_INTERFACE_READ(m,result) m->read(m->data, result)
+#define METER_INTERFACE_EXIT(m) m->exit(m->data)
 
 meter_error_t clear_gpio_pin(u32 gpio_num);
 meter_error_t set_gpio_pin(u32 gpio_num);

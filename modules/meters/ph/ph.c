@@ -11,15 +11,17 @@ static meter_fops_t my_fops =
 
 static mcp3201_t chip =
 {
-	.gpio.clk = 0,
-	.gpio.data = 0,
-	.gpio.enable = 0
+	.gpio.clk = 10,
+	.gpio.data = 9,
+	.gpio.enable = 11
 };
 
 static meter_interface_t my_meter = 
 {
 	.data.mcp3201 = &chip,
-	.read = NULL
+	.init = &mcp3201_startup,
+	.read = &mcp3201_read,
+	.exit = &mcp3201_exit
 };
 
 meter_dev_t ph_meter_dev =

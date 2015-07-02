@@ -24,7 +24,9 @@
 #include <linux/fs.h>
 #include <linux/kernel.h>
 #include <linux/errno.h>
+#include <asm/uaccess.h>
 #include "meter_fops.h"
+#include "meter_phy.h"
 
 int default_open(struct inode *, struct file *);
 int default_release(struct inode *, struct file *);
@@ -71,13 +73,18 @@ long default_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 ssize_t default_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 {
 	meter_dev_t * dev = filp->private_data;
-	
+	meter_data_t data;
+
 	if(dev == NULL)
 		return -ENODEV;
 
-	/*TODO: Read data from the phy */
-	
-	return 0;
+	if(METER_SUCCESS != dev->meter->read(dev->meter->data, &data))
+		return -ENODEV;
+
+	if(copy_to_user(buf, &data, sizeof(meter_data_t)))
+		return -EFAULT;
+
+	return sizeof(meter_data_t);
 }
 
 int default_release(struct inode *inode, struct file *filp)
