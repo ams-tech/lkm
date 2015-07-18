@@ -5,6 +5,7 @@
 #include <linux/types.h>
 
 #include "meter.h"
+#include "meter_app.h"
 
 #define NUM_GPIO	41
 
@@ -19,12 +20,6 @@ typedef enum gpio_function_X
 	GPIO_ALT_FUNC_4 = 3,
 	GPIO_ALT_FUNC_5 = 2,
 }gpio_function_t;
-
-typedef struct meter_data_X
-{
-	u8 sig_bits;
-	u32 payload;
-}meter_data_t;
 
 struct mcp3201_X;
 
