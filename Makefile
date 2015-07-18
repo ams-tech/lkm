@@ -1,7 +1,7 @@
 LINUX_SRC=$(CURDIR)/linux
 
 .PHONY: all
-all:	linux modules
+all:	linux modules apps
 
 .PHONY: modules
 modules:
@@ -16,6 +16,12 @@ clean_modules:
 .PHONY: clean
 clean:
 	rm -rf build
+
+.PHONY: apps
+apps:
+	mkdir -p build/apps
+	$(MAKE) LINUX=$(LINUX_SRC) -C apps
+	cp apps/build/* build/apps/.
 
 linux:
 	$(error Directory "linux" does not exist.  You should probably make a symlink to a linux source directory)
