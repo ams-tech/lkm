@@ -7,4 +7,4 @@ all: $(APPS)
 $(APPS):
 	$(MAKE) -C $(CURDIR)/$@
 	mkdir -p build
-	cp -f $@/build/* build/.
+	cp -f $@/$@ build/.

@@ -27,6 +27,7 @@
 #include <linux/types.h>
 #include <linux/cdev.h>
 
+#include "meter_app.h"
 
 typedef enum meter_error_X
 {
@@ -69,8 +70,6 @@ typedef struct meter_dev_X
 #else
 METER_DEV_EXTERNS
 #endif
-
-#define MODULE_NAME	"meters"
 
 meter_error_t generic_dev_init(meter_dev_t * dev);
 
