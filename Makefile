@@ -1,13 +1,22 @@
 LINUX_SRC=$(CURDIR)/linux
 
 .PHONY: all
-all:	linux modules apps
+all:	install_all
+
+install:
+	echo "Directory 'install' does not exist.  Creating it..."
+	mkdir -p install
+
+.PHONY: install_all
+install_all: linux modules apps install
+	cp -r build/* install/.
+	
 
 .PHONY: modules
 modules:
 	mkdir -p build/modules
 	$(MAKE) LINUX_SRC=$(LINUX_SRC) -C modules
-	cp modules/build/* build/modules/.
+	cp -r modules/build/* build/modules/.
 
 .PHONY: clean_modules
 clean_modules:
