@@ -4,6 +4,10 @@ MODULES = meters
 .PHONY: all
 all: $(MODULES)
 
+.PHONY: clean
+clean:
+	rm -rf build
+
 .PHONY: $(MODULES)
 $(MODULES):
 	$(MAKE) -C $(CURDIR)/$@ LINUX_SRC=$(LINUX_SRC)

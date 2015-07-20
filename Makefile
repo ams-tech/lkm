@@ -13,8 +13,12 @@ modules:
 clean_modules:
 	make -C modules clean
 
+.PHONY: clean_apps
+clean_apps:
+	make -C apps clean
+
 .PHONY: clean
-clean:
+clean: clean_modules clean_apps
 	rm -rf build
 
 .PHONY: apps
