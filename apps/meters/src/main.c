@@ -5,16 +5,17 @@
 
 #define ERROR_FORMAT()	printf("Execution format: \r\n\t./meters DEVICE_NAME DEVICE_ACTION (SUB_ACTION) (-OPTIONS) \r\nRun 'meters -h' for more info\r\n")
 
-typedef void (*option_f)(void);
-
 typedef uint32_t option_flag_t;
+
+typedef void (*option_f)(void);
+typedef void (*action_f)(char *device, char *sub_action, option_flag_t flags);
+
 /*Disk space is cheap*/
 #define MAX_DESCRIPTION_LENGTH	255
 #define MAX_ACTION_LENGTH 45
 
 #define MAX_ARGS	3
 #define MAX_OPTIONS	(sizeof(option_flag_t) * 8)
-
 
 typedef struct option_X
 {
@@ -27,14 +28,16 @@ typedef struct action_X
 {
 	char name[MAX_ACTION_LENGTH];
 	char description[MAX_DESCRIPTION_LENGTH];
+	action_f act;
 }action_t;
 
 void help_menu(void);
 option_flag_t handle_options_arg(char *argv);
+void meter_read(char *device, char *sub_action, option_flag_t flags);
 
 action_t actions[] =
 {
-	{"read", "read the value from the meter"},
+	{"read", "read the value from the meter", &meter_read},
 };
 
 #define NUM_ACTIONS	(sizeof(actions) / sizeof(action_t))
@@ -48,6 +51,11 @@ option_t options[] =
 
 _Static_assert(NUM_OPTIONS <= MAX_OPTIONS, 
 		"ERROR: Size of options_flag_t is too small.");
+
+void meter_read(char *device, char *sub_action, option_flag_t option)
+{
+	printf("I'm in the meter read function\r\n");
+}
 
 void help_menu(void)
 {
@@ -105,7 +113,7 @@ int main( int argc, char *argv[])
 	int i, j;
 	option_flag_t flags = 0;
 
-	for (i = 0; i < argc; i++)
+	for (i = 1; i < argc; i++)
 	{
 		if(argv[i] != NULL)
 		{
@@ -130,10 +138,25 @@ int main( int argc, char *argv[])
 		if(((flags & (1 << i)) != 0) && (options[i].pre_call != NULL))
 			options[i].pre_call();
 	}
-	if(num_args < 2)
+	if((num_args < 2))
 	{
+		/* we checked above for anything greater than MAX_ARGS */
 		ERROR_FORMAT();
 		return -1;
+	}
+	else
+	{
+		for( i = 0; i < NUM_ACTIONS; i++)
+		{
+			if(strcmp(actions[i].name, my_args[1]) == 0)
+			{
+				if(actions[i].act != NULL)
+				{
+					actions[i].act(my_args[0], 
+							my_args[2], flags);
+				}
+			}
+		}
 	}
 
 	return 0;
