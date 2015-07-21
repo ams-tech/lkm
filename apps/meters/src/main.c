@@ -86,8 +86,6 @@ option_flag_t handle_options_arg(char *argv)
 			if(options[j].char_flag == argv[i])
 			{
 				retval |= (1 << j);
-				if(options[j].pre_call != NULL)
-					options[j].pre_call();
 				break;
 			}
 		}
@@ -126,6 +124,11 @@ int main( int argc, char *argv[])
 				}
 			}
 		}
+	}
+	for (i = 0; i < NUM_OPTIONS; i++)
+	{
+		if(((flags & (1 << i)) != 0) && (options[i].pre_call != NULL))
+			options[i].pre_call();
 	}
 	if(num_args < 2)
 	{
