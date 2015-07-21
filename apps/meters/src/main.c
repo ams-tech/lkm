@@ -3,14 +3,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#define ERROR_FORMAT()	printf("Execution format: ./meters DEVICE_NAME DEVICE_ACTION (SUB_ACTION) (-OPTIONS)\
-				\r\nRun 'meters -h' for more info\r\n")
+#define ERROR_FORMAT()	printf("Execution format: \r\n\t./meters DEVICE_NAME DEVICE_ACTION (SUB_ACTION) (-OPTIONS) \r\nRun 'meters -h' for more info\r\n")
 
 typedef void (*option_f)(void);
 
 typedef uint32_t option_flag_t;
 /*Disk space is cheap*/
 #define MAX_DESCRIPTION_LENGTH	255
+#define MAX_ACTION_LENGTH 45
 
 #define MAX_ARGS	3
 #define MAX_OPTIONS	(sizeof(option_flag_t) * 8)
@@ -23,8 +23,21 @@ typedef struct option_X
 	option_f pre_call; /* This function is called before anything else is parsed.  i.e. if we see the flag, call it */
 }option_t;
 
+typedef struct action_X
+{
+	char name[MAX_ACTION_LENGTH];
+	char description[MAX_DESCRIPTION_LENGTH];
+}action_t;
+
 void help_menu(void);
 option_flag_t handle_options_arg(char *argv);
+
+action_t actions[] =
+{
+	{"read", "read the value from the meter"},
+};
+
+#define NUM_ACTIONS	(sizeof(actions) / sizeof(action_t))
 
 option_t options[] = 
 {
@@ -39,6 +52,15 @@ _Static_assert(NUM_OPTIONS <= MAX_OPTIONS,
 void help_menu(void)
 {
 	int i;
+
+	printf("List of available actions (not necessarily supported on all devices):\r\n");
+
+	for (i = 0; i < NUM_ACTIONS; i++)
+	{
+		printf("\t%s :\r\n\t\t%s\r\n", 
+			actions[i].name, actions[i].description);
+	}
+
 
 	printf("List of avilable options:\r\n");
 
