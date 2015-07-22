@@ -1,4 +1,4 @@
-OBJECTS = main.o
+OBJECTS = main.o meter_actions.o
 ODIR = obj
 SDIR = src
 IDIR = inc
