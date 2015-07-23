@@ -12,7 +12,9 @@ int meter_read(char *device, char *sub_action, option_flag_t flags);
 
 action_t actions[] =
 {
-	{"read", "read the value from the meter", &meter_read},
+	{"read", "Read the value from the meter", &meter_read},
+	{"info", "Read the device info", &meter_info},
+
 };
 
 #define NUM_ACTIONS	(sizeof(actions) / sizeof(action_t))

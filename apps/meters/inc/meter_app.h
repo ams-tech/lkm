@@ -1,5 +1,5 @@
-#ifndef __METER_APP_H__
-#define __METER_APP_H__
+#ifndef APPSPACE__METER_APP_H__
+#define APPSPACE__METER_APP_H__
 
 #include <stdint.h>
 #include "module/meter_app.h"

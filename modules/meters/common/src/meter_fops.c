@@ -27,6 +27,7 @@
 #include <asm/uaccess.h>
 #include "meter_fops.h"
 #include "meter_phy.h"
+#include "meter_app.h"
 
 int default_open(struct inode *, struct file *);
 int default_release(struct inode *, struct file *);
