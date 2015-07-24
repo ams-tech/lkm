@@ -6,6 +6,7 @@
 #else
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <sys/ioctl.h>
 #include <errno.h>
 
@@ -41,9 +42,10 @@ typedef struct meter_data_X
 #define B_IOCTL_GET_METER_INFO _IOW(METER_MAGIC_NUMBER, 1, int)
 
 
-#define IOCTL_GET_BUF _IOR(METER_MAGIC_NUMBER, 4, void *)
+#define IOCTL_GET_BUF 		_IOR(METER_MAGIC_NUMBER, 4, void *)
+#define IOCTL_BUF_RESET		_IO(METER_MAGIC_NUMBER, 5)
 
-#define IOCTL_GET_MAGIC _IOW(METER_MAGIC_NUMBER, 5, char)
+#define IOCTL_GET_MAGIC _IOW(METER_MAGIC_NUMBER, 6, char)
 
 #ifndef __KERNEL__
 
@@ -66,7 +68,12 @@ static inline int get_buffered_result(int fd, unsigned int ioctl_num, void *buf)
 	buf = malloc(len);
 
 	if(buf == NULL)
+	{
+		if(ioctl(fd, IOCTL_BUF_RESET) < 0)
+			printf("ERROR: Unable to reset the buffer.\r\n\t\
+				The device may have locked up or reset!");
 		return -ENOMEM;
+	}
 
 	retval = ioctl(fd, IOCTL_GET_BUF, buf);
 

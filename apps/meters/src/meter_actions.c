@@ -11,7 +11,7 @@ static int meter_open(char *device)
 	int retval;
 	char magic;
 
-	retval = open(device, O_RDWR);
+	retval = open(device, O_RDONLY);
 
 	if(retval < 0)
 	{
@@ -27,6 +27,38 @@ static int meter_open(char *device)
 		close(retval);
 		return -EINVAL;
 	}
+	else
+		PRINT_DEBUG("Successfully opened meter and read the magic num");
+	
+	return retval;
+}
+
+static int meter_close(int fd)
+{
+	if(fd < 0)
+		return -EBADF;
+
+	return close(fd);
+}
+
+int meter_test(char *device, char *sub_action, option_flag_t flags)
+{
+	int fd;
+
+	if(device == NULL)
+		return -1;
+
+	printf("Device Name: %s\r\n", device);
+
+	fd = meter_open(device);
+	if (fd < 0)
+	{
+		printf("Error opening meter\r\n");
+		return fd;
+	}
+	meter_close(fd);
+
+	return 0;
 }
 
 int meter_read(char *device, char *sub_action, option_flag_t flags)

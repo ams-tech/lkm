@@ -68,7 +68,34 @@ void fops_exit(meter_dev_t * dev)
 
 long default_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
-	return 0;
+	long retval = 0;
+
+	if(_IOC_TYPE(cmd) != METER_MAGIC_NUMBER) 
+		return -ENOTTY;
+	if(_IOC_DIR(cmd) & _IOC_READ)
+		retval = !access_ok(VERIFY_WRITE, 
+				(void __user *)arg, _IOC_SIZE(cmd));
+	if(retval < 0)
+		return -EFAULT;
+
+	if(_IOC_DIR(cmd) & _IOC_WRITE)
+		retval = !access_ok(VERIFY_READ,
+				(void __user *)arg, _IOC_SIZE(cmd));
+	
+	if(retval < 0)
+		return -EFAULT;
+
+	switch(cmd)
+	{
+		case IOCTL_GET_MAGIC:
+		{
+			retval = __put_user(METER_MAGIC_NUMBER, 
+					(char __user *)arg);
+		}
+		break;
+	}
+
+	return retval;
 }
 
 ssize_t default_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)

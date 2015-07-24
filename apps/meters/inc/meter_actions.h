@@ -17,5 +17,6 @@ typedef struct action_X
 
 int meter_read(char *device, char *sub_action, option_flag_t flags);
 int meter_info(char *device, char * sub_action, option_flag_t flags);
+int meter_test(char *device, char *sub_action, option_flag_t flags);
 
 #endif

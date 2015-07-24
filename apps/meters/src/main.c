@@ -14,6 +14,7 @@ action_t actions[] =
 {
 	{"read", "Read the value from the meter", &meter_read},
 	{"info", "Read the device info", &meter_info},
+	{"test", "Check the device magic number", &meter_test},
 
 };
 

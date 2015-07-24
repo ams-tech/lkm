@@ -1,6 +1,8 @@
 #ifndef APPSPACE__METER_APP_H__
 #define APPSPACE__METER_APP_H__
 
+#define METER_DEBUG
+
 #include <stdint.h>
 #include "module/meter_app.h"
 
@@ -13,6 +15,12 @@ typedef void (*option_f)(void);
 
 #define MAX_ACTION_LENGTH	45
 #define MAX_DESCRIPTION_LENGTH	255
+
+#ifdef METER_DEBUG
+#define PRINT_DEBUG(x) printf(x); printf("\r\n")
+#else
+#define PRINT_DEBUG(x)
+#endif 
 
 typedef struct option_X
 {
