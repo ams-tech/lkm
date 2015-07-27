@@ -2,7 +2,7 @@ METERS = ph
 LINUX_SRC ?= undefined
 
 .PHONY: all
-all: 
+all: scripts
 	rm -f Kbuild_inc
 	EXTERNS=""; INITS="{"; NUMMETERS=0; for meter in $(METERS) ; do \
 		echo "include \$$(src)/$$meter/Kbuild" >> Kbuild_inc ; \
@@ -14,3 +14,9 @@ all:
 	echo "$$INITS" ; \
 	$(MAKE) -C $(LINUX_SRC) M=$(CURDIR) MY_INITS="$$INITS" MY_EXTERNS="$$EXTERNS" NUM_METERS=$$NUMMETERS modules
  
+.PHONY: scripts
+scripts:
+	rm -f scripts/meters
+	echo "#!/bin/bash" >> scripts/meters
+	echo "METERS=${METERS}" >> scripts/meters
+	chmod 775 scripts/meters
