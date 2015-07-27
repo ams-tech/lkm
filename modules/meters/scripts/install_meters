@@ -1,0 +1,56 @@
+#!/bin/bash
+device="meter"
+module="meters"
+module_name=${module}".ko"
+SCRIPT=$(readlink -f "$0")
+SCRIPTPATH=$(dirname "${SCRIPT}")
+MODULE_PATH=${SCRIPTPATH}/..
+
+rm -f /dev/${device}?
+
+major=$(awk "\$2 == \"$module\" {print \$1}" /proc/devices)
+
+if [[ -z ${major} ]]; then
+	echo "Device did not need to be uninstalled"
+else
+	rmmod ${module}
+fi
+
+major=$(awk "\$2 == \"$module\" {print \$1}" /proc/devices)
+
+if [[ -z "${major}" ]]; then
+        echo "Proceeding to install ${module} driver"
+else
+	echo "Error! Unable to remove ${module} driver!"
+	exit 1
+fi
+
+insmod ${MODULE_PATH}/${module_name}
+
+major=$(awk "\$2 == \"$module\" {print \$1}" /proc/devices)
+
+if [[ -z "${major}" ]]; then
+	echo "Error! Unable to find ${device} device"
+	exit 1
+else
+	echo "Meter device number: ${major}"
+fi
+
+if [[ -x ${SCRIPTPATH}/meters ]];
+then
+	. ${SCRIPTPATH}/meters
+else
+	echo "No 'meters' file to load"
+	METERS=""
+fi
+
+num=0
+
+for METER in ${METERS}
+do
+	echo "Creating a ${METER} ${device} device as device /dev/${device}${num}"
+	mknod /dev/${device}${num} c ${major} ${num}
+	num=$(( num + 1 ))
+done
+
+echo "Successfully installed the ${module_name} device driver and ${num} devices"
