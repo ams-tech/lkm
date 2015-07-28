@@ -63,7 +63,29 @@ int meter_test(char *device, char *sub_action, option_flag_t flags)
 
 int meter_read(char *device, char *sub_action, option_flag_t flags)
 {
-	printf("I'm in the meter read function!\r\n");
+
+	int fd, retval = 0;
+	meter_data_t data;
+
+	if(device == NULL)
+		return -1;
+
+	fd = meter_open(device);
+	if (fd < 0)
+	{
+		return fd;
+	}
+	if(sizeof(data) != read(fd, &data, sizeof(data)))
+	{
+		retval = -2;
+	}
+	else
+	{
+		printf("Read %d from meter\r\n", data.payload);
+	}
+	
+
+	meter_close(fd);
 	return 0;
 }
 
