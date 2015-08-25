@@ -81,6 +81,32 @@ int meter_read(char *device, char *sub_action, option_flag_t flags)
 	}
 	else
 	{
+		long result = 0;
+		bool negative = false;
+		for (int i = 0; i < data.sig_bits; i++)
+		{
+			int device_bit;
+			if(data.is_big_endian)
+			{
+				device_bit = (data.sig_bits - i);
+			}
+			else
+			{
+				device_bit = i;
+			}
+
+			if((device_bit == (data.sib_bits - 1)) && (data.is_signed))
+			{
+				negative = (data.payload & (1 << device_bit)) != 0;
+			}
+			else
+			{
+				result |= (data.payload & (1 << device_bit));
+			}
+		}
+
+		//TODO: convert result to a value based on result
+
 		printf("Read %d from meter\r\n", data.payload);
 	}
 	
