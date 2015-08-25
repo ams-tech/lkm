@@ -84,6 +84,7 @@ meter_error_t mcp3201_read(chip_data_t data, meter_data_t * result)
 {
 	result->sig_bits = RESULT_BITS;
 	result->payload = read_voltage(data.mcp3201);
+	result->is_signed = false;
 	if(result->payload == MCP3201_ERROR)
 		return METER_UNKNOWN_ERROR;
 	else
