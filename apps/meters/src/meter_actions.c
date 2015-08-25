@@ -4,6 +4,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <stdbool.h>
 
 /* returns a negative error code or an fd */
 static int meter_open(char *device)
@@ -82,8 +83,9 @@ int meter_read(char *device, char *sub_action, option_flag_t flags)
 	else
 	{
 		long result = 0;
+		int i;
 		bool negative = false;
-		for (int i = 0; i < data.sig_bits; i++)
+		for (i = 0; i < data.sig_bits; i++)
 		{
 			int device_bit;
 			if(data.is_big_endian)
@@ -95,7 +97,7 @@ int meter_read(char *device, char *sub_action, option_flag_t flags)
 				device_bit = i;
 			}
 
-			if((device_bit == (data.sib_bits - 1)) && (data.is_signed))
+			if((device_bit == (data.sig_bits - 1)) && (data.is_signed))
 			{
 				negative = (data.payload & (1 << device_bit)) != 0;
 			}

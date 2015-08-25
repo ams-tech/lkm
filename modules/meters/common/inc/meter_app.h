@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <errno.h>
+#include <stdbool.h>
 
 typedef uint8_t u8;
 typedef uint32_t u32;
