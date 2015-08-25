@@ -26,6 +26,7 @@ struct mcp3201_X;
 typedef union chip_data_X
 {
 	struct mcp3201_X * mcp3201;
+	struct mcp3301_X * mcp3301;
 }chip_data_t;
 
 typedef meter_error_t (*read_meter_f)(chip_data_t data, meter_data_t * result);
