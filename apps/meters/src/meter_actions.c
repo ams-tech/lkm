@@ -105,7 +105,11 @@ int meter_read(char *device, char *sub_action, option_flag_t flags)
 			}
 		}
 
-		//TODO: convert result to a value based on result
+		if(negative)
+		{
+			//Two's complement magic
+			result = ((1 << (data.sig_bits - 1)) * -1) + result;
+		}
 
 		printf("Read %d from meter\r\n", data.payload);
 	}
