@@ -22,12 +22,16 @@ typedef void (*option_f)(void);
 #define PRINT_DEBUG(x)
 #endif 
 
+#define OPTION_READ_VOLTAGE	'V'
+
 typedef struct option_X
 {
 	char char_flag;
 	char description[MAX_DESCRIPTION_LENGTH];
 	option_f pre_call;
 }option_t;
+
+bool is_option_set(char char_flag, option_flag_t options);
 
 #endif
 

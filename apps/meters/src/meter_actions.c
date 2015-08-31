@@ -1,46 +1,12 @@
 #include "meter_actions.h"
+#include "meter_app.h"
 #include "module/meter_app.h"
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdbool.h>
-
-/* returns a negative error code or an fd */
-static int meter_open(char *device)
-{
-	int retval;
-	char magic;
-
-	retval = open(device, O_RDONLY);
-
-	if(retval < 0)
-	{
-		printf("Error opening the device!\r\n");
-		return retval;
-	}
-
-	ioctl(retval, IOCTL_GET_MAGIC, &magic);
-
-	if(magic != METER_MAGIC_NUMBER)
-	{
-		printf("Error: device doesn't appear to be a meter device\r\n");
-		close(retval);
-		return -EINVAL;
-	}
-	else
-		PRINT_DEBUG("Successfully opened meter and read the magic num");
-	
-	return retval;
-}
-
-static int meter_close(int fd)
-{
-	if(fd < 0)
-		return -EBADF;
-
-	return close(fd);
-}
+#include "device_actions.h"
 
 int meter_test(char *device, char *sub_action, option_flag_t flags)
 {
@@ -51,13 +17,13 @@ int meter_test(char *device, char *sub_action, option_flag_t flags)
 
 	printf("Device Name: %s\r\n", device);
 
-	fd = meter_open(device);
+	fd = device_open(device);
 	if (fd < 0)
 	{
 		printf("Error opening meter\r\n");
 		return fd;
 	}
-	meter_close(fd);
+	device_close(fd);
 
 	return 0;
 }
@@ -66,66 +32,28 @@ int meter_read(char *device, char *sub_action, option_flag_t flags)
 {
 
 	int fd, retval = 0;
+	float value;
 	meter_data_t data;
 
 	if(device == NULL)
 		return -1;
 
-	fd = meter_open(device);
+	fd = device_open(device);
 	if (fd < 0)
 	{
 		return fd;
 	}
-	if(sizeof(data) != read(fd, &data, sizeof(data)))
+
+	if(read_value(fd, &value) != DEVICE_SUCCESS)
 	{
-		retval = -2;
+		printf("Unable to read value from meter!\r\n");
 	}
 	else
 	{
-		long result = 0;
-		int i;
-		bool negative = false;
-		for (i = 0; i < data.sig_bits; i++)
-		{
-			int device_bit;
-			if(data.is_big_endian)
-			{
-				device_bit = (data.sig_bits - i);
-			}
-			else
-			{
-				device_bit = i;
-			}
-
-			if((device_bit == (data.sig_bits - 1)) && (data.is_signed))
-			{
-				negative = (data.payload & (1 << device_bit)) != 0;
-			}
-			else
-			{
-				result |= (data.payload & (1 << device_bit));
-			}
-		}
-
-		if(negative)
-		{
-			//Two's complement magic
-			result = ((1 << (data.sig_bits - 1)) * -1) + result;
-		}
-
-		printf("Read %d from meter\r\n", data.payload);
+		printf("Read value %f from meter\r\n", value);
 	}
-	
 
-	meter_close(fd);
-	return 0;
+	device_close(fd);
+	return retval;
 }
 
-/*
-	Print the info from the device driver.
-*/
-int meter_info(char *device, char *sub_action, option_flag_t flags)
-{
-	
-
-}

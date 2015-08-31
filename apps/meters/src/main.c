@@ -13,9 +13,7 @@ int meter_read(char *device, char *sub_action, option_flag_t flags);
 action_t actions[] =
 {
 	{"read", "Read the value from the meter", &meter_read},
-	{"info", "Read the device info", &meter_info},
 	{"test", "Check the device magic number", &meter_test},
-
 };
 
 #define NUM_ACTIONS	(sizeof(actions) / sizeof(action_t))
@@ -23,6 +21,7 @@ action_t actions[] =
 option_t options[] = 
 {
 	{'h', "The help menu.  You're reading it right now!", &help_menu},
+	{OPTION_READ_VOLTAGE, "Read the device voltage instead of the measurment", NULL}
 };
 
 #define NUM_OPTIONS	(sizeof(options)/sizeof(option_t))
@@ -77,6 +76,17 @@ option_flag_t handle_options_arg(char *argv)
 		}
 	}
 	return retval;
+}
+
+bool is_option_set(char char_flag, option_flag_t flags)
+{
+	int i;
+	for(i = 0; i < NUM_OPTIONS; i++)
+	{
+		if(char_flag == options[i].char_flag)
+			return true;
+	}
+	return false;
 }
 
 int main( int argc, char *argv[])
