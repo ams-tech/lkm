@@ -11,9 +11,9 @@ static meter_fops_t my_fops =
 
 static mcp3301_t chip =
 {
-	.gpio.clk = 10,
-	.gpio.data = 9,
-	.gpio.enable = 11
+	.gpio.clk = 25,
+	.gpio.data = 8,
+	.gpio.enable = 7
 };
 
 static meter_interface_t my_meter = 
