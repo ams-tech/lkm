@@ -4,20 +4,19 @@
 #include <linux/delay.h>
 #include "meter.h"
 
-#define HALF_PERIOD_NS	625
-#define TSCH_NS	625
-#define TSUCS_NS	100
-
+#define CS_DISABLE_TIME_NS	580
+#define CS_ENABLE_HOLD_TIME_NS	100
+#define CLOCK_HALF_PERIOD_NS	300
 
 static inline bool read_bit(mcp3301_t * chip)
 {
 	bool retval;
 
 	set_gpio_pin(chip->gpio.clk);
-        ndelay(HALF_PERIOD_NS);
+        ndelay(CLOCK_HALF_PERIOD_NS);
 	get_gpio_pin(chip->gpio.data, &retval);
         clear_gpio_pin(chip->gpio.clk);
-        ndelay(HALF_PERIOD_NS);
+        ndelay(CLOCK_HALF_PERIOD_NS);
 
 	return retval;
 }
@@ -37,13 +36,11 @@ static u16 read_voltage(mcp3301_t * chip)
 	set_gpio_pin(chip->gpio.enable);
 	set_gpio_function(chip->gpio.enable, GPIO_OUTPUT);
 
-	/* Wait for tCSH - 625 ns */
-	ndelay(TSCH_NS);
+	ndelay(CS_DISABLE_TIME_NS);
 
 	clear_gpio_pin(chip->gpio.enable);
 
-	/* wait tSUCS - 100 ns */
-	ndelay(TSUCS_NS);
+	ndelay(CS_ENABLE_HOLD_TIME_NS);
 
 	/* fCLK = 800kHz.  Half-period is 625 ns */
 

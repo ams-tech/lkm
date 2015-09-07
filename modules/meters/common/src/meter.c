@@ -71,6 +71,8 @@ int __init meter_init(void)
 		
 	}
 
+	printk(KERN_DEBUG "Successfully installed %s kernel module", MODULE_NAME);	
+
 	return 0;
 }
 
