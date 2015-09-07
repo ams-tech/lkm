@@ -61,6 +61,8 @@ static u16 read_voltage(mcp3301_t * chip)
 			retval |= 1 << (RESULT_BITS - 1 - x);
 	}
 
+	set_gpio_pin(chip->gpio.enable);
+
 exit:
 	mutex_unlock(&(chip->lock));
 	return retval;
